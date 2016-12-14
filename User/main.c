@@ -47,11 +47,11 @@ int main(void)
 		
 //		if(key[3])//数字传输模式
 	//  {
-		UART2_ReportMotion(BLE_DEBUG[0],BLE_DEBUG[1] , BLE_DEBUG[2], 
-				 BLE_DEBUG[3], BLE_DEBUG[4], BLE_DEBUG[5],
-				 BLE_DEBUG[6], BLE_DEBUG[7], BLE_DEBUG[8]);
-		UART2_ReportIMU( BLE_DEBUG[9], BLE_DEBUG[10], BLE_DEBUG[11]
-		, BLE_DEBUG[12], BLE_DEBUG[13], BLE_DEBUG[14], BLE_DEBUG[15]);
+//		UART2_ReportMotion(BLE_DEBUG[0],BLE_DEBUG[1] , BLE_DEBUG[2], 
+//				 BLE_DEBUG[3], BLE_DEBUG[4], BLE_DEBUG[5],
+//				 BLE_DEBUG[6], BLE_DEBUG[7], BLE_DEBUG[8]);
+//		UART2_ReportIMU( BLE_DEBUG[9], BLE_DEBUG[10], BLE_DEBUG[11]
+//		, BLE_DEBUG[12], BLE_DEBUG[13], BLE_DEBUG[14], BLE_DEBUG[15]);
 //		}
  //   else		
 		GOL_LINK_TASK();

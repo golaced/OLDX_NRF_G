@@ -1,6 +1,6 @@
 #include "head.h"
 
-
+void UART2_Put_Char(unsigned char DataToSend);
 void usart1_config(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -233,16 +233,20 @@ void USART1_IRQHandler(void)
 
 void Usart2_Send(unsigned char *DataToSend ,u8 data_num)
 {
-  u8 i;
-	for(i=0;i<data_num;i++)
-	{
-		TxBuffer[count++] = *(DataToSend+i);
-	}
+//  u8 i;
+//	for(i=0;i<data_num;i++)
+//	{
+//		TxBuffer[count++] = *(DataToSend+i);
+//	}
 
-	if(!(USART1->CR1 & USART_CR1_TXEIE))
-	{
-		USART_ITConfig(USART1, USART_IT_TXE, ENABLE); //打开发送中断
-	}
+//	if(!(USART1->CR1 & USART_CR1_TXEIE))
+//	{
+//		USART_ITConfig(USART1, USART_IT_TXE, ENABLE); //打开发送中断
+//	}
+
+u16 i;
+  for(i=0;i<data_num;i++)
+     UART2_Put_Char(DataToSend[i]);
 
 }
 
@@ -289,7 +293,7 @@ void Send_Status(void)
 		sum += data_to_send[i];
 	data_to_send[_cnt++]=sum;
 	
-	Usart2_Send(data_to_send, _cnt);
+	Send_Data_GOL_LINK(data_to_send, _cnt);
 }
 
 
@@ -341,7 +345,7 @@ void Send_GPS(void)
 		sum += data_to_send[i];
 	data_to_send[_cnt++]=sum;
 	
-	Usart2_Send(data_to_send, _cnt);
+	Send_Data_GOL_LINK(data_to_send, _cnt);
 }
 
 void Send_BAT(void)
@@ -371,7 +375,7 @@ void Send_BAT(void)
 		sum += data_to_send[i];
 	data_to_send[_cnt++]=sum;
 	
-	Usart2_Send(data_to_send, _cnt);
+	Send_Data_GOL_LINK(data_to_send, _cnt);
 }
 
 
@@ -419,7 +423,7 @@ void Send_PID1(void)
 		sum += data_to_send[i];
 	data_to_send[_cnt++] = sum;
 	
-	Usart2_Send(data_to_send, _cnt);
+	Send_Data_GOL_LINK(data_to_send, _cnt);
 }
 
 
@@ -454,7 +458,7 @@ void Send_PID2(void)
 		sum += data_to_send[i];
 	data_to_send[_cnt++] = sum;
 	
-	Usart2_Send(data_to_send, _cnt);
+	Send_Data_GOL_LINK(data_to_send, _cnt);
 }
 
 void Send_Senser(void)
@@ -513,7 +517,7 @@ void Send_Senser(void)
 		sum += data_to_send[i];
 	data_to_send[_cnt++] = sum;
 	
-	Usart2_Send(data_to_send, _cnt);
+	Send_Data_GOL_LINK(data_to_send, _cnt);
 }
 
 
@@ -570,7 +574,7 @@ void Send_GPS_Ublox(void)
 		sum += data_to_send[i];
 	data_to_send[_cnt++] = sum;
 	
-	Usart2_Send(data_to_send, _cnt);
+	Send_Data_GOL_LINK(data_to_send, _cnt);
 }
 
 void Send_DEBUG1(void)
@@ -595,7 +599,7 @@ void Send_DEBUG1(void)
 		sum += data_to_send[i];
 	data_to_send[_cnt++]=sum;
 	
-	Usart2_Send(data_to_send, _cnt);
+	Send_Data_GOL_LINK(data_to_send, _cnt);
 }
 
 
@@ -617,7 +621,7 @@ void Send_Check(u16 check)
 	
 	data_to_send[7]=sum;
 
-	Usart2_Send(data_to_send, 8);
+	Send_Data_GOL_LINK(data_to_send, 8);
 }
 
 
