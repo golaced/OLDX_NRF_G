@@ -54,6 +54,9 @@ int main(void)
 //		, BLE_DEBUG[12], BLE_DEBUG[13], BLE_DEBUG[14], BLE_DEBUG[15]);
 //		}
  //   else		
+		
+		}
+		if(cnt[2]++>1){cnt[2]=0;	
 		GOL_LINK_TASK();
 		}
 		delay_ms(5);

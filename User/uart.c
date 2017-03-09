@@ -625,27 +625,104 @@ void Send_Check(u16 check)
 }
 
 
+void Send_APP(void)
+{ u8 i;	u8 sum = 0,_temp3;	vs32 _temp2 = 0;	vs16 _temp;
+	u8 data_to_send[50];
+	u8 _cnt=0;
+	u8 st=0;
+	data_to_send[_cnt++]=0xAA;
+	data_to_send[_cnt++]=0xAA;
+	data_to_send[_cnt++]=0x01;
+	data_to_send[_cnt++]=0;
+	_temp =0;// (int)(Rol_fc*100);
+	data_to_send[_cnt++]=BYTE1(_temp);
+	data_to_send[_cnt++]=BYTE0(_temp);
+	_temp =0;// (int)(Pit_fc*100);
+	data_to_send[_cnt++]=BYTE1(_temp);
+	data_to_send[_cnt++]=BYTE0(_temp);
+	_temp = (int)(yaw_gimbal*100);
+	data_to_send[_cnt++]=BYTE1(_temp);
+	data_to_send[_cnt++]=BYTE0(_temp);
+  _temp3=0;//fly_ready;
+	data_to_send[_cnt++]=_temp3;
+	_temp3=0;//NS;//1;//is_RC_PIN;
+	data_to_send[_cnt++]=_temp3;
+  _temp3=0;//EN_FIX_GPSF;
+	data_to_send[_cnt++]=_temp3;
+	_temp3=0;//EN_FIX_LOCKWF;
+	data_to_send[_cnt++]=_temp3;
+	_temp3=0;//EN_CONTROL_IMUF;
+	data_to_send[_cnt++]=_temp3;
+	_temp3=0;//EN_FIX_INSF;
+	data_to_send[_cnt++]=_temp3;
+	_temp3=0;//EN_FIX_HIGHF;
+	data_to_send[_cnt++]=_temp3;
+ 	_temp =state_drone;//  mcuID[0];
+	data_to_send[_cnt++]=BYTE1(_temp);
+	data_to_send[_cnt++]=BYTE0(_temp);
+	_temp = (int)(qr_pos[0]);
+	data_to_send[_cnt++]=BYTE1(_temp);
+	data_to_send[_cnt++]=BYTE0(_temp);
+	_temp = (int)(qr_pos[1]);
+	data_to_send[_cnt++]=BYTE1(_temp);
+	data_to_send[_cnt++]=BYTE0(_temp);
+	_temp = 0;//(int)(z);
+	data_to_send[_cnt++]=BYTE1(_temp);
+	data_to_send[_cnt++]=BYTE0(_temp);
+	
+	_temp = (int)(tar_pos[0]);//]nav_pos_ctrl[0].exp*1000);
+	data_to_send[_cnt++]=BYTE1(_temp);
+	data_to_send[_cnt++]=BYTE0(_temp);
+	_temp = (int)(tar_pos[1]);//nav_pos_ctrl[1].exp*1000);
+	data_to_send[_cnt++]=BYTE1(_temp);
+	data_to_send[_cnt++]=BYTE0(_temp);
+	_temp =0;// (int)(exp_height);
+	data_to_send[_cnt++]=BYTE1(_temp);
+	data_to_send[_cnt++]=BYTE0(_temp);
+	
+	
+	_temp = (int)(drone_pos[0]);
+	data_to_send[_cnt++]=BYTE1(_temp);
+	data_to_send[_cnt++]=BYTE0(_temp);
+	_temp = (int)(drone_pos[1]);
+	data_to_send[_cnt++]=BYTE1(_temp);
+	data_to_send[_cnt++]=BYTE0(_temp);
+	_temp = (int)(drone_pos[2]);
+	data_to_send[_cnt++]=BYTE1(_temp);
+	data_to_send[_cnt++]=BYTE0(_temp);
+	
+	_temp = need_avoid;
+	data_to_send[_cnt++]=BYTE0(_temp);
+	
+  data_to_send[3+st] = _cnt-st-4;
+	for( i=st;i<_cnt;i++)
+		sum += data_to_send[i];
+	data_to_send[_cnt++]=sum;
+	
+	Usart2_Send(data_to_send, _cnt);
+}
 
 void GOL_LINK_TASK(void)
 { static u8 flag1=0;
 	static u8 cnt = 0;
+	
 	switch(cnt)
 	{
 		case 1: 
-			Send_Status();
+			Send_APP();//Send_Status();
 			break;
 		case 2:
 			if(flag1)
-		  Send_BAT();
+		  Send_PID2();//Send_BAT();
 			else
 			Send_PID1();
 			break;
 		case 3:
-			
-			if(flag1)
-		  Send_DEBUG1();//Send_GPS_Ublox();//Send_Senser();
-			else
-			Send_PID2();
+			Send_APP();
+//			if(flag1)
+//		  Send_DEBUG1();//Send_GPS_Ublox();//Send_Senser();
+//			else
+//			Send_PID2();
 		break;
 		case 4:
 			if(flag1)

@@ -56,6 +56,10 @@ struct _plane plane;
 struct _slam slam;
 struct _IMU_NAV imu_nav;
 struct _MODE mode;
+int qr_pos[2],tar_pos[2],drone_pos[3];
+int yaw_gimbal;
+u8 state_drone,need_avoid,tar_check;
+
 void NRF_DataAnl(void)
 { 
 u8 temp_key[7];
@@ -63,10 +67,12 @@ u8 temp;
 	u8 i=0,j,sum = 0;
 	for( i=0;i<31;i++)
 		sum += NRF24L01_RXDATA[i];
-	if(!(sum==NRF24L01_RXDATA[31]))		return;		//??sum
-	if(!(NRF24L01_RXDATA[0]==0x88))		return;		//????
+	if(!(sum==NRF24L01_RXDATA[31]))		
+		return;		//??sum
+	if(!(NRF24L01_RXDATA[0]==0x88))		
+		return;		//????
 	
-	if(NRF24L01_RXDATA[1]==1)								//?D??1|?ü×?,=0x8a,?aò￡??êy?Y
+	if(NRF24L01_RXDATA[1]==0x1)								//?D??1|?ü×?,=0x8a,?aò￡??êy?Y
 	{ //TIM_Cmd(TIM2,DISABLE);
 		//cnt_timer2_reg=cnt_timer2;
 		bat_fly=((vs16)(NRF24L01_RXDATA[3]<<8)|NRF24L01_RXDATA[4]);
@@ -93,7 +99,7 @@ u8 temp;
 		EN_FIX_HIGHF=(NRF24L01_RXDATA[29]);
 			 rc_rate_cnt[0]++;
 	}
-	else 		if(NRF24L01_RXDATA[1]==2)	//接收PID1
+	else 		if(NRF24L01_RXDATA[1]==0x2)	//接收PID1
 		{ rc_rate_cnt[1]++;
 			SPIDt.OP = (float)((vs16)(NRF24L01_RXDATA[4]<<8)|NRF24L01_RXDATA[5]);
 			SPIDt.OI = (float)((vs16)(NRF24L01_RXDATA[6]<<8)|NRF24L01_RXDATA[7]);
@@ -106,7 +112,7 @@ u8 temp;
 			SPIDt.YD = (float)((vs16)(NRF24L01_RXDATA[20]<<8)|NRF24L01_RXDATA[21]);
 		//	EE_SAVE_PID();
 		}
-	else 		if(NRF24L01_RXDATA[1]==3)	//接收PID2
+	else 		if(NRF24L01_RXDATA[1]==0x3)	//接收PID2
 		{ rc_rate_cnt[2]++;
 			HPIDt.OP = (float)((vs16)(NRF24L01_RXDATA[4]<<8)|NRF24L01_RXDATA[5]);
 			HPIDt.OI = (float)((vs16)(NRF24L01_RXDATA[6]<<8)|NRF24L01_RXDATA[7]);
@@ -116,7 +122,7 @@ u8 temp;
 			
 		//	EE_SAVE_PID();
 		}
-	else 		if(NRF24L01_RXDATA[1]==4)	//接收sensor
+	else 		if(NRF24L01_RXDATA[1]==0x4)	//接收sensor
 	{ rc_rate_cnt[3]++;
 			ax = ((vs16)(NRF24L01_RXDATA[3]<<8)|NRF24L01_RXDATA[4]);
 			ay = ((vs16)(NRF24L01_RXDATA[5]<<8)|NRF24L01_RXDATA[6]);
@@ -136,7 +142,7 @@ u8 temp;
 		  
 	//	EE_SAVE_PID();
 	}
- else 		if(NRF24L01_RXDATA[1]==5)	//GPS
+ else 		if(NRF24L01_RXDATA[1]==0x5)	//GPS
 	{  rc_rate_cnt[4]++;
 			imu_nav.gps.J = 			(NRF24L01_RXDATA[4]<<24)|(NRF24L01_RXDATA[5]<<16)|(NRF24L01_RXDATA[6]<<8)|NRF24L01_RXDATA[7];
 			imu_nav.gps.W = 			(NRF24L01_RXDATA[8]<<24)|(NRF24L01_RXDATA[9]<<16)|(NRF24L01_RXDATA[10]<<8)|NRF24L01_RXDATA[11];
@@ -147,7 +153,7 @@ u8 temp;
 			imu_nav.gps.X_UKF =	  (NRF24L01_RXDATA[22]<<24)|(NRF24L01_RXDATA[23]<<16)|(NRF24L01_RXDATA[24]<<8)|NRF24L01_RXDATA[25];
 			imu_nav.gps.Y_UKF = 	(NRF24L01_RXDATA[26]<<24)|(NRF24L01_RXDATA[27]<<16)|(NRF24L01_RXDATA[28]<<8)|NRF24L01_RXDATA[29];
 	}
- else 		if(NRF24L01_RXDATA[1]==30)	//Debug1
+ else 		if(NRF24L01_RXDATA[1]==0x30)	//Debug1
 	{  
 		
 			DEBUG[1] = (float)((vs16)(NRF24L01_RXDATA[4]<<8)|NRF24L01_RXDATA[5]);
@@ -164,7 +170,7 @@ u8 temp;
 			DEBUG[12]= (float)((vs16)(NRF24L01_RXDATA[28]<<8)|NRF24L01_RXDATA[27]);
 		  DEBUG[13]= (float)((vs16)(NRF24L01_RXDATA[30]<<8)|NRF24L01_RXDATA[29]);
 	}	
- else 		if(NRF24L01_RXDATA[1]==31)	//Debug1
+ else 		if(NRF24L01_RXDATA[1]==0x31)	//Debug1
 	{  
 		
 			DEBUG[14] = (float)((vs16)(NRF24L01_RXDATA[4]<<8)|NRF24L01_RXDATA[5]);
@@ -198,6 +204,28 @@ u8 temp;
 			BLE_DEBUG[11]= ((vs16)(NRF24L01_RXDATA[25]<<8)|NRF24L01_RXDATA[26]);
 		  BLE_DEBUG[12]= ((vs16)(NRF24L01_RXDATA[27]<<8)|NRF24L01_RXDATA[28]);
 	}	
+	 else	if(NRF24L01_RXDATA[1]==0x66)	//APP
+	{  
+		
+
+			state_drone = (float)((vs16)(NRF24L01_RXDATA[3]<<8)|NRF24L01_RXDATA[4]);
+			drone_pos[2] = (float)((vs16)(NRF24L01_RXDATA[5]<<8)|NRF24L01_RXDATA[6]);
+			tar_pos[0] = (float)((vs16)(NRF24L01_RXDATA[7]<<8)|NRF24L01_RXDATA[8]);
+			tar_pos[1] = (float)((vs16)(NRF24L01_RXDATA[9]<<8)|NRF24L01_RXDATA[10]);
+			drone_pos[0] = (float)((vs16)(NRF24L01_RXDATA[11]<<8)|NRF24L01_RXDATA[12]);
+			drone_pos[1] = (float)((vs16)(NRF24L01_RXDATA[13]<<8)|NRF24L01_RXDATA[14]);
+			qr_pos[0] = (float)((vs16)(NRF24L01_RXDATA[15]<<8)|NRF24L01_RXDATA[16]);
+			qr_pos[1] = (float)((vs16)(NRF24L01_RXDATA[17]<<8)|NRF24L01_RXDATA[18]);
+			yaw_gimbal = (float)((vs16)(NRF24L01_RXDATA[19]<<8)|NRF24L01_RXDATA[20]);
+		  need_avoid = NRF24L01_RXDATA[21];
+		  tar_check = NRF24L01_RXDATA[22];
+		 // DEBUG[23]= (float)((vs16)(NRF24L01_RXDATA[22]<<8)|NRF24L01_RXDATA[23]);
+			//DEBUG[24]= (float)((vs16)(NRF24L01_RXDATA[24]<<8)|NRF24L01_RXDATA[25]);
+			//DEBUG[25]= (float)((vs16)(NRF24L01_RXDATA[28]<<8)|NRF24L01_RXDATA[27]);
+		  //DEBUG[26]= (float)((vs16)(NRF24L01_RXDATA[30]<<8)|NRF24L01_RXDATA[29]);
+		
+		
+	}
 }
 
 

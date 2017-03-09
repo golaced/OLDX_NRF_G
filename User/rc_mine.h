@@ -311,5 +311,8 @@ u8 en_flow_gro_fix;
 u8 flow_size;
 };
 	
+extern int qr_pos[2],tar_pos[2],drone_pos[3];
+extern int yaw_gimbal;
+extern u8 state_drone,need_avoid,tar_check;
 
 #endif
